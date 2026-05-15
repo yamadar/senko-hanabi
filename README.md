@@ -1,30 +1,32 @@
 # Senko Hanabi
 
-線香花火のような光の散りを描く Canvas アニメーション SPA。
+線香花火の Canvas アニメーション SPA。
 
-## 起動
+## セットアップ
 
 ```bash
-npm install        # リポジトリルートで一度だけ
-npm run dev -w senko-hanabi
+npm install
+```
+
+## 開発
+
+```bash
+npm run dev
 ```
 
 `http://localhost:5185/` が自動で開きます。
 
-## ビルド
+## テスト・ビルド
 
 ```bash
-npm run build -w senko-hanabi
+npm test
+npm run build
 ```
 
-## 構成
+## アーキテクチャ
 
-```
-senko-hanabi/
-├── index.html      # マークアップのみ
-├── vite.config.js
-├── package.json
-└── src/
-    ├── main.js     # ロジック（style.css を import）
-    └── style.css   # スタイル
-```
+モジュール構成・設計の詳細は [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) を参照。
+
+## ライセンス
+
+[MIT](./LICENSE)

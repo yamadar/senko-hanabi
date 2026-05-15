@@ -2,14 +2,24 @@
   "name": "senko-hanabi",
   "private": true,
   "version": "0.1.0",
+  "description": "線香花火の Canvas アニメーション SPA",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yamadar/senko-hanabi.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "vite": "^6.0.7"
+    "prettier": "^3.4.2",
+    "vite": "^6.0.7",
+    "vitest": "^3.0.0"
   }
 }
