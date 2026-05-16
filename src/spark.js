@@ -10,21 +10,41 @@ export class Spark {
    * @param {number} y
    * @param {number} hueBase   親の色相 (度)
    * @param {number} intensity 親の発光強度 0..1
-   * @param {boolean} burst    弾けるバーストか
+   * @param {'normal'|'burst'|'orb'} kind 種別。burst=弾ける火花, orb=なぞり用の光の玉
    */
-  constructor(x, y, hueBase, intensity, burst = false) {
+  constructor(x, y, hueBase, intensity, kind = 'normal') {
     this.x = x;
     this.y = y;
     const angle = Math.random() * Math.PI * 2;
-    const speed = burst ? 1.5 + Math.random() * 3.5 : 0.3 + Math.random() * 1.5;
+    let speed, decay, size, gravity, rise;
+    if (kind === 'burst') {
+      speed = 1.5 + Math.random() * 3.5;
+      decay = 0.015 + Math.random() * 0.02;
+      size = 1.8 + Math.random() * 2.2;
+      gravity = 0.025 + Math.random() * 0.02;
+      rise = 0.3;
+    } else if (kind === 'orb') {
+      // なぞり用の光の玉: ゆっくり漂い、長く残り、大きめに光る
+      speed = 0.1 + Math.random() * 0.5;
+      decay = 0.004 + Math.random() * 0.006;
+      size = 2.2 + Math.random() * 2.2;
+      gravity = 0.002 + Math.random() * 0.004;
+      rise = 0.15;
+    } else {
+      speed = 0.3 + Math.random() * 1.5;
+      decay = 0.025 + Math.random() * 0.04;
+      size = 0.9 + Math.random() * 1.8;
+      gravity = 0.025 + Math.random() * 0.02;
+      rise = 0.3;
+    }
     this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed - 0.3; // やや上向きバイアス
+    this.vy = Math.sin(angle) * speed - rise; // やや上向きバイアス
     this.life = 1.0;
-    this.decay = burst ? 0.015 + Math.random() * 0.02 : 0.025 + Math.random() * 0.04;
-    this.size = burst ? 1.8 + Math.random() * 2.2 : 0.9 + Math.random() * 1.8;
+    this.decay = decay;
+    this.size = size;
     this.hue = (hueBase + (Math.random() - 0.5) * 20 + 360) % 360;
     this.hueIdx = hueToIndex(this.hue);
-    this.gravity = 0.025 + Math.random() * 0.02;
+    this.gravity = gravity;
     this.brightness = intensity;
     this.twinkle = Math.random() * Math.PI * 2;
   }

@@ -1,11 +1,12 @@
 // 線香花火 — エントリポイント / Entry point.
 // canvas の取得、リサイズ配線、アニメーションループの駆動のみを担当する。
-// ロジックは config.js / math.js / sprites.js / spark.js / sparkler.js に分離。
+// ロジックは config.js / math.js / sprites.js / spark.js / sparkler.js / pointer.js に分離。
 
 import './style.css';
 import { lifespanToDecay, computeEffectiveMax } from './math.js';
 import { buildSprites } from './sprites.js';
 import { Sparkler } from './sparkler.js';
+import { PointerField } from './pointer.js';
 
 (() => {
   const canvas = document.getElementById('canvas');
@@ -42,14 +43,21 @@ import { Sparkler } from './sparkler.js';
   sparklers.push(new Sparkler(W * 0.3, H * 0.6));
   sparklers.push(new Sparkler(W * 0.7, H * 0.4));
 
-  // クリック/タップで追加 (実質上限を超えても可)
-  // 超過中は自動分裂が停止するので、自然消滅で上限まで減っていく
-  function addAt(x, y) {
-    sparklers.push(new Sparkler(x, y));
-  }
+  // ポインタ操作: なぞり→光の玉, 長押し→引力, 離す→離散バースト, タップ→火種追加
+  // (タップでの火種追加は実質上限を超えても可。超過中は自動分裂が停止する)
+  const pointer = new PointerField();
   canvas.addEventListener('pointerdown', (e) => {
-    addAt(e.clientX, e.clientY);
+    canvas.setPointerCapture?.(e.pointerId);
+    pointer.down(e.clientX, e.clientY, performance.now(), e.pointerId);
   });
+  canvas.addEventListener('pointermove', (e) => {
+    pointer.move(e.clientX, e.clientY, e.pointerId);
+  });
+  function endPointer(e) {
+    pointer.up(e.clientX, e.clientY, performance.now(), e.pointerId);
+  }
+  canvas.addEventListener('pointerup', endPointer);
+  canvas.addEventListener('pointercancel', endPointer);
 
   // 描画ループ
   function loop(now) {
@@ -65,6 +73,9 @@ import { Sparkler } from './sparkler.js';
 
     // 加算合成で発光感
     ctx.globalCompositeOperation = 'lighter';
+
+    // ポインタ操作: 光の玉生成・引力・離散バーストを反映
+    pointer.update(sparks, sparklers, t);
 
     // 火花更新・描画
     for (let i = sparks.length - 1; i >= 0; i--) {

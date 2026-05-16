@@ -146,7 +146,7 @@ export class Sparkler {
       const burstCount = 9 + Math.floor(Math.random() * 10);
       for (let i = 0; i < burstCount; i++) {
         if (sparks.length < MAX_SPARKS) {
-          sparks.push(new Spark(this.x, this.y, this.currentHue, intensity, true));
+          sparks.push(new Spark(this.x, this.y, this.currentHue, intensity, 'burst'));
         }
       }
     }
@@ -221,7 +221,7 @@ export class Sparkler {
       const burstY = (this.y + cy) / 2;
       for (let i = 0; i < 20; i++) {
         if (sparks.length < MAX_SPARKS) {
-          sparks.push(new Spark(burstX, burstY, this.currentHue, 1.0, true));
+          sparks.push(new Spark(burstX, burstY, this.currentHue, 1.0, 'burst'));
         }
       }
 

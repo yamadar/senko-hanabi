@@ -11,6 +11,8 @@ import {
   splitChance,
   clamp,
   randRange,
+  attractAccel,
+  burstSpeed,
 } from './math.js';
 import { MAX_SPARKLERS, CYCLE_SECONDS, HUE_STEPS } from './config.js';
 
@@ -250,6 +252,59 @@ describe('randRange', () => {
       const v = randRange(5, 9);
       expect(v).toBeGreaterThanOrEqual(5);
       expect(v).toBeLessThan(9);
+    }
+  });
+});
+
+describe('attractAccel', () => {
+  it('returns 0 at or beyond the radius', () => {
+    expect(attractAccel(100, 100, 1)).toBe(0);
+    expect(attractAccel(150, 100, 1)).toBe(0);
+  });
+
+  it('reaches its full strength at the center', () => {
+    expect(attractAccel(0, 100, 2)).toBeCloseTo(2);
+  });
+
+  it('is half strength at half the radius', () => {
+    expect(attractAccel(50, 100, 2)).toBeCloseTo(1);
+  });
+
+  it('decreases monotonically as distance grows', () => {
+    let prev = Infinity;
+    for (let d = 0; d <= 100; d += 10) {
+      const a = attractAccel(d, 100, 1);
+      expect(a).toBeLessThanOrEqual(prev);
+      prev = a;
+    }
+  });
+
+  it('returns 0 for a non-positive radius', () => {
+    expect(attractAccel(10, 0, 1)).toBe(0);
+  });
+});
+
+describe('burstSpeed', () => {
+  it('is fastest at the center', () => {
+    expect(burstSpeed(0, 100, 10)).toBeCloseTo(10);
+  });
+
+  it('keeps a fraction of the power at the outer edge', () => {
+    expect(burstSpeed(100, 100, 10)).toBeCloseTo(4);
+  });
+
+  it('decreases monotonically with distance', () => {
+    let prev = Infinity;
+    for (let d = 0; d <= 100; d += 10) {
+      const v = burstSpeed(d, 100, 10);
+      expect(v).toBeLessThanOrEqual(prev);
+      prev = v;
+    }
+  });
+
+  it('stays positive within the radius', () => {
+    for (let d = 0; d <= 100; d += 10) {
+      expect(burstSpeed(d, 100, 10)).toBeGreaterThan(0);
     }
   });
 });
