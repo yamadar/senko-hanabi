@@ -13,9 +13,9 @@ import { attractAccel, burstSpeed, clamp } from './math.js';
 
 export const LONG_PRESS_MS = 320; // これを超える押下を「長押し」とみなす
 export const TAP_MOVE_PX = 14; // この距離未満の短い押下はタップ
-export const TRACE_STEP_PX = 22; // 軌跡上で光の玉を生成する間隔
-export const ATTRACT_RADIUS = 280; // 引力が届く半径
-export const BURST_RADIUS = 320; // バーストが届く半径
+export const TRACE_STEP_PX = 16; // 軌跡上で光の玉を生成する間隔 (短いほど密)
+export const ATTRACT_RADIUS = 440; // 引力が届く半径
+export const BURST_RADIUS = 560; // バーストが届く半径
 
 export class PointerField {
   constructor() {
@@ -103,19 +103,29 @@ export class PointerField {
       const k = TRACE_STEP_PX / dist;
       this.traceX += dx * k;
       this.traceY += dy * k;
-      this.hue = (this.hue + 5) % 360; // 軌跡に沿って虹色に変化
-      const n = 2 + Math.floor(Math.random() * 2);
-      for (let i = 0; i < n && sparks.length < MAX_SPARKS; i++) {
+      this.hue = (this.hue + 7) % 360; // 軌跡に沿って虹色に変化
+
+      // 光の玉を密に生成 (1ステップあたり 4〜6 個)
+      const orbs = 4 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < orbs && sparks.length < MAX_SPARKS; i++) {
         sparks.push(
           new Spark(
-            this.traceX + (Math.random() - 0.5) * 9,
-            this.traceY + (Math.random() - 0.5) * 9,
+            this.traceX + (Math.random() - 0.5) * 16,
+            this.traceY + (Math.random() - 0.5) * 16,
             this.hue,
             1.0,
             'orb',
           ),
         );
       }
+      // ときどき弾ける火花を散らしてきらめかせる
+      if (Math.random() < 0.55) {
+        const sparkle = 3 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < sparkle && sparks.length < MAX_SPARKS; i++) {
+          sparks.push(new Spark(this.traceX, this.traceY, this.hue, 1.0, 'burst'));
+        }
+      }
+
       dx = this.x - this.traceX;
       dy = this.y - this.traceY;
       dist = Math.hypot(dx, dy);
@@ -156,7 +166,7 @@ export class PointerField {
 
   /** バースト中心から放射状に火花・火種を弾き飛ばし、中心に閃光を足す。 */
   burst(b, sparks, sparklers) {
-    const power = 6 + b.strength * 9;
+    const power = 11 + b.strength * 18;
     for (let i = 0; i < sparks.length; i++) {
       const s = sparks[i];
       const dist = Math.hypot(s.x - b.x, s.y - b.y);
@@ -164,14 +174,14 @@ export class PointerField {
       const [ux, uy] = direction(s.x - b.x, s.y - b.y, dist);
       const sp = burstSpeed(dist, BURST_RADIUS, power) * (0.7 + Math.random() * 0.7);
       s.vx = ux * sp;
-      s.vy = uy * sp - 1.3; // やや上向き
-      // 飛びながら見えるように再点火
-      s.life = Math.max(s.life, 0.72 + Math.random() * 0.28);
-      s.decay = 0.012 + Math.random() * 0.016;
+      s.vy = uy * sp - 1.6; // やや上向き
+      // 遠くまで飛びながら見えるように再点火・低減衰化
+      s.life = Math.max(s.life, 0.78 + Math.random() * 0.22);
+      s.decay = 0.009 + Math.random() * 0.013;
       s.twinkle = Math.random() * Math.PI * 2;
     }
     // 中心の閃光
-    const flash = 36 + Math.floor(b.strength * 80);
+    const flash = 54 + Math.floor(b.strength * 120);
     for (let i = 0; i < flash && sparks.length < MAX_SPARKS; i++) {
       sparks.push(new Spark(b.x, b.y, this.hue, 1.0, 'burst'));
     }
@@ -181,9 +191,9 @@ export class PointerField {
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       if (dist > BURST_RADIUS) continue;
       const [ux, uy] = direction(a.x - b.x, a.y - b.y, dist);
-      const sp = burstSpeed(dist, BURST_RADIUS, 3 + b.strength * 5);
+      const sp = burstSpeed(dist, BURST_RADIUS, 5 + b.strength * 9);
       a.vx = ux * sp;
-      a.vy = uy * sp - 0.6;
+      a.vy = uy * sp - 0.8;
     }
   }
 }
