@@ -121,3 +121,28 @@ export function clamp(value, min, max) {
 export function randRange(min, max) {
   return min + Math.random() * (max - min);
 }
+
+/**
+ * 引力 (長押し) の加速度の大きさ。対象点までの距離が radius 以内なら、
+ * 中心に近いほど強く・遠いほど弱い (線形フォールオフ)。範囲外は 0。
+ * @param {number} dist     対象点までの距離
+ * @param {number} radius   引力の有効半径
+ * @param {number} strength 中心での最大加速度
+ */
+export function attractAccel(dist, radius, strength) {
+  if (radius <= 0 || dist >= radius) return 0;
+  return strength * (1 - dist / radius);
+}
+
+/**
+ * 離散バースト (長押しを離した瞬間) の放出速度。
+ * 中心に近い粒子ほど速く、外周ほどゆるやかに飛ぶ。
+ * @param {number} dist   バースト中心からの距離
+ * @param {number} radius バーストの有効半径
+ * @param {number} power  中心での最大速度
+ */
+export function burstSpeed(dist, radius, power) {
+  if (radius <= 0) return power;
+  const d = clamp(dist / radius, 0, 1);
+  return power * (1 - 0.6 * d);
+}

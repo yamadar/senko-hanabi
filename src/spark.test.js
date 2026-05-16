@@ -22,10 +22,22 @@ describe('Spark constructor', () => {
     let ambientSum = 0;
     const n = 400;
     for (let i = 0; i < n; i++) {
-      burstSum += new Spark(0, 0, 0, 1, true).size;
-      ambientSum += new Spark(0, 0, 0, 1, false).size;
+      burstSum += new Spark(0, 0, 0, 1, 'burst').size;
+      ambientSum += new Spark(0, 0, 0, 1, 'normal').size;
     }
     expect(burstSum / n).toBeGreaterThan(ambientSum / n);
+  });
+
+  it('gives orb sparks a much longer life (smaller decay) than ambient sparks', () => {
+    // orb decay 0.004..0.010, ambient 0.025..0.065 — orbs linger far longer
+    let orbSum = 0;
+    let ambientSum = 0;
+    const n = 400;
+    for (let i = 0; i < n; i++) {
+      orbSum += new Spark(0, 0, 0, 1, 'orb').decay;
+      ambientSum += new Spark(0, 0, 0, 1, 'normal').decay;
+    }
+    expect(orbSum / n).toBeLessThan(ambientSum / n);
   });
 
   it('carries the parent intensity as brightness', () => {
